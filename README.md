@@ -122,17 +122,28 @@ docker push ghcr.io/hostlyma/gatewayms:latest
 
 1. Kubernetes cluster running
 2. Nginx Ingress Controller installed
-3. Backend and frontend services deployed
-4. GitHub secrets configured:
+3. GitHub secrets configured:
    - `KUBE_CONFIG`: Base64-encoded kubeconfig
 
-### Manual Deployment
+### Centralized Deployment
+
+**All Kubernetes manifests are in `k8s/` directory**. Deploy everything from there:
 
 ```bash
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-kubectl apply -f k8s/ingress.yaml
+cd k8s
+
+# Quick deployment (all components)
+chmod +x deploy-all.sh
+./deploy-all.sh
+
+# Or deploy manually:
+kubectl apply -f postgres/     # Database first
+kubectl apply -f backend/      # Backend second
+kubectl apply -f frontend/     # Frontend third
+kubectl apply -f gateway/      # Gateway last
 ```
+
+See `k8s/README.md` for detailed deployment instructions.
 
 ### Verify Deployment
 

@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hostly-web-config
+  labels:
+    app: hostly-web
+data:
+  APP_NAME: "HostlyMA"
+  APP_ENV: "production"
+  APP_DEBUG: "false"
+  APP_URL: "http://46.224.158.32"
+  
+  # Database Configuration
+  DB_CONNECTION: "pgsql"
+  DB_DATABASE: "laravel"
+  
+  # Session Configuration
+  SESSION_DRIVER: "database"
+  SESSION_LIFETIME: "120"
+  
+  # Cache Configuration
+  CACHE_DRIVER: "database"
+  
+  # Queue Configuration
+  QUEUE_CONNECTION: "database"
+  
+  # Logging Configuration
+  LOG_CHANNEL: "stack"
+  LOG_LEVEL: "info"
+  
+  # Mail Configuration (update with your SMTP settings)
+  MAIL_MAILER: "smtp"
+  MAIL_HOST: "smtp.mailtrap.io"
+  MAIL_PORT: "2525"
+  MAIL_USERNAME: ""
+  MAIL_PASSWORD: ""
+  MAIL_ENCRYPTION: "tls"
+  MAIL_FROM_ADDRESS: "noreply@hostlyma.com"
+  MAIL_FROM_NAME: "HostlyMA"
+
