@@ -19,6 +19,8 @@ spec:
       labels:
         app: gatewayms
     spec:
+      imagePullSecrets:
+      - name: ghcr-secret
       containers:
       - name: nginx-gateway
         image: ghcr.io/hostlyma/gatewayms:latest

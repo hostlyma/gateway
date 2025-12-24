@@ -19,6 +19,8 @@ spec:
       labels:
         app: hostly-web
     spec:
+      imagePullSecrets:
+      - name: ghcr-secret
       containers:
       - name: laravel
         image: ghcr.io/hostlyma/hostly-web:latest

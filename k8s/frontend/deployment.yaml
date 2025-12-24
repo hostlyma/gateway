@@ -19,6 +19,8 @@ spec:
       labels:
         app: hostly-react-front
     spec:
+      imagePullSecrets:
+      - name: ghcr-secret
       containers:
       - name: react-app
         image: ghcr.io/hostlyma/hostly-react-front:latest

@@ -79,7 +79,50 @@ kubectl apply -f k8s/gateway/
 
 ## Before Deployment
 
-### 1. Update Secrets
+### 0. ⚠️ Build and Push Docker Images First!
+
+**IMPORTANT**: You must build and push Docker images to GitHub Container Registry before deploying!
+
+**Option 1: Push to GitHub** (Recommended - triggers CI/CD):
+```bash
+# Push to main branch in each repository to trigger GitHub Actions
+git push origin main
+```
+
+**Option 2: Build manually** (See `BUILD-FIRST.md` for details):
+```bash
+docker login ghcr.io -u YOUR_USERNAME -p YOUR_PAT
+docker build -t ghcr.io/hostlyma/gatewayms:latest ./gatewayms
+docker push ghcr.io/hostlyma/gatewayms:latest
+# Repeat for hostly-web and hostly-react-front
+```
+
+**Verify images exist** before deploying:
+```bash
+docker pull ghcr.io/hostlyma/gatewayms:latest
+```
+
+### 1. Create Image Pull Secret (for GitHub Container Registry)
+
+The deployments are configured to use `ghcr-secret` for pulling images from `ghcr.io`. 
+
+**If you haven't created it yet**, create the secret:
+
+```bash
+kubectl create secret docker-registry ghcr-secret \
+  --docker-server=ghcr.io \
+  --docker-username=YOUR_GITHUB_USERNAME \
+  --docker-password=YOUR_GITHUB_PAT \
+  --docker-email=YOUR_EMAIL \
+  --namespace=default
+```
+
+**Verify the secret exists:**
+```bash
+kubectl get secret ghcr-secret
+```
+
+### 2. Update Secrets
 
 **Backend Secret** (`backend/secret.yaml`):
 ```yaml
@@ -92,7 +135,7 @@ DB_PASSWORD: "YOUR_SECURE_PASSWORD"
 POSTGRES_PASSWORD: "YOUR_SECURE_PASSWORD"  # Must match DB_PASSWORD above
 ```
 
-### 2. Update ConfigMap (if needed)
+### 3. Update ConfigMap (if needed)
 
 Edit `backend/configmap.yaml` to update environment variables like:
 - `APP_URL`
@@ -159,6 +202,23 @@ kubectl delete -f postgres/
 - **Health Check**: `pg_isready`
 
 ## Troubleshooting
+
+### Image Pull Errors
+
+If pods fail with `ImagePullBackOff` or `ErrImagePull`:
+
+```bash
+# Check if the secret exists
+kubectl get secret ghcr-secret
+
+# Verify secret details
+kubectl describe secret ghcr-secret
+
+# Check pod events for image pull errors
+kubectl describe pod <pod-name>
+```
+
+### General Troubleshooting
 
 ```bash
 # Check pod status
