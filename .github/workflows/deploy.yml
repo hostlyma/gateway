@@ -1,4 +1,4 @@
-name: Deploy to Kubernetes
+name: Build and Push Docker Image
 
 on:
   push:
@@ -10,7 +10,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -49,40 +49,13 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'latest'
-
-    - name: Configure kubectl
-      env:
-        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
+    - name: Image build summary
       run: |
-        mkdir -p $HOME/.kube
-        echo "$KUBE_CONFIG_DATA" | base64 -d > $HOME/.kube/config
-        chmod 600 $HOME/.kube/config
-        export KUBECONFIG=$HOME/.kube/config
-        echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
-        
-        # Verify kubectl can connect
-        kubectl cluster-info || true
-        kubectl get nodes || true
-
-    - name: Update Kubernetes deployment
-      run: |
-        # Update image in deployment with the latest tag
-        kubectl set image deployment/gatewayms \
-          nginx-gateway=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-          -n default
-
-    - name: Wait for rollout
-      run: |
-        kubectl rollout status deployment/gatewayms -n default --timeout=300s
-
-    - name: Verify deployment
-      run: |
-        echo "Deployment completed successfully!"
-        kubectl get pods -l app=gatewayms -n default
-        kubectl get svc gatewayms-service -n default
-        kubectl get ingress gateway-ingress -n default
-
+        echo "✅ Docker image built and pushed successfully!"
+        echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        echo ""
+        echo "To pull this image manually:"
+        echo "  docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        echo ""
+        echo "To update Kubernetes deployment manually:"
+        echo "  kubectl set image deployment/gatewayms nginx-gateway=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest -n default"
