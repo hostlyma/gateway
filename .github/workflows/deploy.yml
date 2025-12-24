@@ -55,10 +55,18 @@ jobs:
         version: 'latest'
 
     - name: Configure kubectl
+      env:
+        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
       run: |
         mkdir -p $HOME/.kube
-        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
-        kubectl config set-cluster default --server=https://46.224.158.32:6443 || true
+        echo "$KUBE_CONFIG_DATA" | base64 -d > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config
+        export KUBECONFIG=$HOME/.kube/config
+        echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
+        
+        # Verify kubectl can connect
+        kubectl cluster-info || true
+        kubectl get nodes || true
 
     - name: Update Kubernetes deployment
       run: |
