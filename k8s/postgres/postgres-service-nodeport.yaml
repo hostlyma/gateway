@@ -1,0 +1,25 @@
+# NodePort Service for PostgreSQL - allows external access
+# This exposes PostgreSQL on a port on each node's IP
+#
+# Usage:
+#   kubectl apply -f postgres-service-nodeport.yaml
+#   Then connect to: <node-ip>:<nodeport>
+#   To find the nodeport: kubectl get svc postgres-service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  labels:
+    app: postgres
+spec:
+  type: NodePort
+  ports:
+  - port: 5432
+    targetPort: 5432
+    nodePort: 30432  # External port (30000-32767 range)
+    protocol: TCP
+    name: postgres
+  selector:
+    app: postgres
+

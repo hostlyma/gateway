@@ -9,11 +9,19 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "75"
+    # Allow IP-based access (no host required)
+    nginx.ingress.kubernetes.io/server-alias: "46.224.158.32"
 spec:
   ingressClassName: nginx
+  # Default backend - works with IP address access
+  defaultBackend:
+    service:
+      name: gatewayms-service
+      port:
+        number: 80
   rules:
-  - host: 46.224.158.32
-    http:
+  # IP-based access (works without domain)
+  - http:
       paths:
       - path: /
         pathType: Prefix
@@ -22,7 +30,7 @@ spec:
             name: gatewayms-service
             port:
               number: 80
-  # Uncomment and configure if you have a domain name
+  # Uncomment and configure when you have a domain name
   # - host: yourdomain.com
   #   http:
   #     paths:
@@ -33,4 +41,5 @@ spec:
   #           name: gatewayms-service
   #           port:
   #             number: 80
+
 

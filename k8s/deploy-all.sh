@@ -96,3 +96,4 @@ echo "  - API Health: http://46.224.158.32/api/health"
 echo "  - Admin:     http://46.224.158.32/admin"
 echo ""
 
+

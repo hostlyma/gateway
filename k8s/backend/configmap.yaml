@@ -37,4 +37,22 @@ data:
   MAIL_ENCRYPTION: "tls"
   MAIL_FROM_ADDRESS: "noreply@hostlyma.com"
   MAIL_FROM_NAME: "HostlyMA"
+  
+  # Filesystem Configuration
+  FILESYSTEM_DISK: "local"
+  
+  # Third-party Service URLs (defaults - override in secret if needed)
+  HOSPITABLE_BASE_URL: "https://api.hospitable.com/v1"
+  HOSPITABLE_CONNECT_BASE_URL: "https://connect.hospitable.com/api/v1"
+  CHANNEX_BASE_URL: "https://staging.channex.io"
+  TTLOCK_BASE_URL: "https://euapi.ttlock.com"
+  
+  # AWS Configuration (if using S3)
+  AWS_DEFAULT_REGION: "us-east-1"
+  
+  # Redis Configuration (if using Redis)
+  REDIS_HOST: "127.0.0.1"
+  REDIS_PASSWORD: ""
+  REDIS_PORT: "6379"
+
 

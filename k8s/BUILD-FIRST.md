@@ -73,3 +73,4 @@ Failed to pull image "ghcr.io/hostlyma/gatewayms:latest": not found
 
 **Remember**: Images must exist in the registry before Kubernetes can pull them!
 
+

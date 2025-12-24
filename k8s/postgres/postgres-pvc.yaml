@@ -10,6 +10,8 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  # Uncomment if using a specific storage class
-  # storageClassName: your-storage-class
+  storageClassName: hostpath  # Using hostpath StorageClass for bare-metal cluster
+  # If using dynamic provisioning, you can omit this to use default
+  # For manual PV binding, ensure this matches the PV's storageClassName
+
 

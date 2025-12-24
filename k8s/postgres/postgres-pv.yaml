@@ -1,0 +1,28 @@
+# Manual PersistentVolume for hostPath storage
+# This creates a PV that uses the node's local filesystem
+#
+# IMPORTANT: Update the 'path' field to match a directory on your node
+# The directory will be created automatically if it doesn't exist
+#
+# Usage:
+#   1. Edit the 'path' field below to your desired location (e.g., /data/postgres)
+#   2. kubectl apply -f postgres-pv.yaml
+#   3. The PVC should automatically bind to this PV
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+  labels:
+    type: local
+spec:
+  storageClassName: hostpath
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /data/postgres  # Change this to your desired path on the node
+    type: DirectoryOrCreate
+

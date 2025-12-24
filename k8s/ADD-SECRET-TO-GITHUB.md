@@ -93,3 +93,4 @@ cat /etc/kubernetes/admin.conf | base64 -w 0
 # Then add it as KUBE_CONFIG secret in each GitHub repository
 ```
 
+

@@ -1,0 +1,24 @@
+# LoadBalancer Service for PostgreSQL - for cloud providers
+# This creates an external load balancer (AWS ELB, GCP LB, Azure LB)
+#
+# Usage:
+#   kubectl apply -f postgres-service-loadbalancer.yaml
+#   kubectl get svc postgres-service
+#   Wait for EXTERNAL-IP to be assigned, then connect to that IP
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  labels:
+    app: postgres
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app: postgres
+

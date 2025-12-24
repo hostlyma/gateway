@@ -1,0 +1,18 @@
+# HostPath StorageClass for bare-metal Kubernetes clusters
+# This StorageClass is used for manual PersistentVolumes (no dynamic provisioning)
+#
+# Usage:
+#   1. kubectl apply -f storageclass-hostpath.yaml
+#   2. Create manual PV (postgres-pv.yaml) that references this StorageClass
+#   3. Delete and recreate the PVC: kubectl delete pvc postgres-pvc && kubectl apply -f postgres/postgres-pvc.yaml
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: hostpath
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+reclaimPolicy: Retain
+

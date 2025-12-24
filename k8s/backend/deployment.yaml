@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hostly-web
+  name: hostly-backend
   labels:
-    app: hostly-web
+    app: hostly-backend
 spec:
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -13,31 +13,113 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: hostly-web
+      app: hostly-backend
   template:
     metadata:
       labels:
-        app: hostly-web
+        app: hostly-backend
     spec:
       imagePullSecrets:
       - name: ghcr-secret
       containers:
       - name: laravel
-        image: ghcr.io/hostlyma/hostly-web:latest
+        image: ghcr.io/hostlyma/backend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
           name: http
         envFrom:
-        - configMapRef:
-            name: hostly-web-config
         - secretRef:
             name: hostly-web-secret
         env:
+        # Database credentials from postgres-secret
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        # Application Configuration
+        - name: APP_NAME
+          value: "HostlyMA"
+        - name: APP_ENV
+          value: "production"
+        - name: APP_DEBUG
+          value: "false"
+        - name: APP_URL
+          value: "http://46.224.158.32"
+        
+        # Database Configuration
+        - name: DB_CONNECTION
+          value: "pgsql"
         - name: DB_HOST
           value: postgres-service
         - name: DB_PORT
           value: "5432"
+        - name: DB_DATABASE
+          value: "hostly"  # Using postgres database (always exists) - create 'laravel' if needed
+        
+        # Session Configuration
+        - name: SESSION_DRIVER
+          value: "database"
+        - name: SESSION_LIFETIME
+          value: "120"
+        
+        # Cache Configuration
+        - name: CACHE_DRIVER
+          value: "database"
+        
+        # Queue Configuration
+        - name: QUEUE_CONNECTION
+          value: "database"
+        
+        # Logging Configuration
+        - name: LOG_CHANNEL
+          value: "stack"
+        - name: LOG_LEVEL
+          value: "info"
+        
+        # Mail Configuration
+        - name: MAIL_MAILER
+          value: "smtp"
+        - name: MAIL_HOST
+          value: "smtp.mailtrap.io"
+        - name: MAIL_PORT
+          value: "2525"
+        - name: MAIL_ENCRYPTION
+          value: "tls"
+        - name: MAIL_FROM_ADDRESS
+          value: "noreply@hostlyma.com"
+        - name: MAIL_FROM_NAME
+          value: "HostlyMA"
+        
+        # Filesystem Configuration
+        - name: FILESYSTEM_DISK
+          value: "local"
+        
+        # Third-party Service URLs
+        - name: HOSPITABLE_BASE_URL
+          value: "https://api.hospitable.com/v1"
+        - name: HOSPITABLE_CONNECT_BASE_URL
+          value: "https://connect.hospitable.com/api/v1"
+        - name: CHANNEX_BASE_URL
+          value: "https://staging.channex.io"
+        - name: TTLOCK_BASE_URL
+          value: "https://euapi.ttlock.com"
+        
+        # AWS Configuration
+        - name: AWS_DEFAULT_REGION
+          value: "us-east-1"
+        
+        # Redis Configuration
+        - name: REDIS_HOST
+          value: "127.0.0.1"
+        - name: REDIS_PORT
+          value: "6379"
         resources:
           requests:
             memory: "256Mi"
@@ -61,10 +143,37 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 3
           failureThreshold: 3
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            # Create all required directories (volumes are mounted, so create in mounted paths)
+            mkdir -p /var/www/html/storage/framework/cache \
+                     /var/www/html/storage/framework/sessions \
+                     /var/www/html/storage/framework/views \
+                     /var/www/html/storage/logs \
+                     /var/www/html/bootstrap/cache \
+                     /var/log/supervisor
+            # Set ownership and permissions (www-data is the PHP-FPM user)
+            chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/log/supervisor
+            chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+            chmod -R 755 /var/log/supervisor
+            # Verify directories are writable
+            touch /var/www/html/bootstrap/cache/.test && rm -f /var/www/html/bootstrap/cache/.test || echo "Warning: cache dir not writable"
+            touch /var/www/html/storage/framework/cache/.test && rm -f /var/www/html/storage/framework/cache/.test || echo "Warning: storage cache dir not writable"
+            # Run entrypoint
+            exec /entrypoint.sh
         volumeMounts:
         - name: storage
           mountPath: /var/www/html/storage
+        - name: cache
+          mountPath: /var/www/html/bootstrap/cache
+        - name: supervisor-logs
+          mountPath: /var/log/supervisor
       volumes:
       - name: storage
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+      - name: supervisor-logs
         emptyDir: {}
 
